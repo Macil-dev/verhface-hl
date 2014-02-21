@@ -6,3 +6,4 @@ module Bindings.Verba.HL
 
 import Bindings.Verba.HL.Types
 import Bindings.Verba.HL.Ops
+import Bindings.Verba.HL.Helpers
