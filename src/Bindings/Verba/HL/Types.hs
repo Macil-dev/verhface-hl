@@ -34,3 +34,8 @@ data VerbaException = VerbaException {_verbaError :: Int} deriving (Eq, Show, Ty
 
 instance Exception VerbaException
 
+instance Ord USR_KEYS_INFO where
+    compare a b = do
+        let a' = _slotNum a
+            b' = _slotNum b in
+                a' `compare` b'
