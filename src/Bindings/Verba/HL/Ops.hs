@@ -148,7 +148,7 @@ readSignStatus 2 = SIGN_STATUS_OKEY_NOT_FOUND
 
 readCheck_Status status =
     Check_Status (BSC8.unpack $ _c_name status)
-                 (reverse . dropWhile (== ' ') . reverse . iconvConvert $ _c_alias status)
+                 (reverse . dropWhile (== ' ') . reverse . decodeCp1251 $ _c_alias status)
                  (fromIntegral $ _c_position status)
                  (readSignStatus $ _c_status status)
                  (case fromIntegral $ _c_date status of

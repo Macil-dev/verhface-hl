@@ -1,13 +1,18 @@
 module Bindings.Verba.HL.Helpers where
 
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as E
+import Data.ByteString.Char8
+import qualified Data.ByteString.Unsafe as BSU
 
-import Codec.Text.IConv
+import System.IO.Unsafe
 
-iconvConvert  =
-    T.unpack . E.decodeUtf8 . BL.toStrict . (convert
-                                             "cp1251"
-                                             "utf-8"
-                                            ) . BL.fromStrict
+import qualified GHC.IO.Encoding as GHC
+import qualified GHC.Foreign as GHC
+
+-- Every time someone write `unsafePerformIO` a cute kitty dies!
+
+cp1251 = unsafePerformIO $ GHC.mkTextEncoding "cp1251"
+
+decodeCp1251 :: ByteString -> String
+decodeCp1251 bs =
+    unsafePerformIO $ BSU.unsafeUseAsCStringLen bs $ \str ->
+                          GHC.peekCStringLen cp1251 str
