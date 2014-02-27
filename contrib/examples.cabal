@@ -1,0 +1,25 @@
+name:                examples
+version:             0.1.0.0
+synopsis:            Examples for verhface-hl
+-- description:         
+license:             PublicDomain
+license-file:        LICENSE
+author:              Macil
+maintainer:          Macil.dev@gmail.com
+-- copyright:           
+-- category:            
+build-type:          Simple
+cabal-version:       >=1.8
+
+executable verhface-hl-sample-simple
+  main-is: Simple.lhs
+  extensions: DoAndIfThenElse
+  extra-libraries: wbotho
+  extra-lib-dirs: c:/Windows/System32
+  -- other-modules:       
+  build-depends:       base ==4.6.*
+                     , verhface-hl
+                     , verhface-ll
+                     , filepath
+                     , directory
+                     , mtl
