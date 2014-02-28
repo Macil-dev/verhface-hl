@@ -41,6 +41,8 @@ signDone :: IO Word16
 signDone = c_SignDone
 
 enCryptFile :: String -> String -> Word16 -> [Word16] -> String -> IO ()
+enCryptFile src dst sender rcvr [] =
+    enCryptFile src dst sender rcvr "\0\0\0\0\0\0"
 enCryptFile src dst sender rcvr series =
     withCString src $ \src' ->
         withCString dst $ \dst' ->
