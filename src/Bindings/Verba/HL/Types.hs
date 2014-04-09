@@ -30,6 +30,20 @@ data Check_Status = Check_Status { _name  :: String
 
 data S_or_E = S | E deriving (Eq, Show, Typeable)
 
+data OpenKeyStatus = OK
+                   | NotOK Int
+                   deriving (Eq, Show, Typeable)
+
+data OpenKeyType = Work
+                 | Reserve
+                 | Compromised
+                 deriving (Eq, Show, Typeable)
+
+data SprList = SprList { _key_id     :: String
+                       , _key_type   :: OpenKeyType
+                       , _key_status :: OpenKeyStatus}
+                       deriving (Eq, Show, Typeable)
+
 data VerbaException = VerbaException {_verbaError :: Int} deriving (Eq, Show, Typeable)
 
 instance Exception VerbaException

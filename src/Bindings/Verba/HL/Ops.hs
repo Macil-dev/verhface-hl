@@ -99,6 +99,22 @@ writeS_or_E E = 69
 readS_or_E 83 = 'S'
 readS_or_E 69 = 'E'
 
+readOpenKeyStatus 0   = OK
+readOpenKeyStatus err = NotOK err
+
+readOpenKeyType :: (Num a, Eq a) => a -> OpenKeyType
+readOpenKeyType 0x20 = Work
+readOpenKeyType 0x52 = Reserve
+readOpenKeyType 0x43 = Compromised
+readOpenKeyType _    = undefined
+
+readSprList :: C_SprList -> SprList
+readSprList (C_SprList id ktype kstatus) =
+    SprList (BSC8.unpack id)
+            (readOpenKeyType ktype)
+            (readOpenKeyStatus . fromIntegral $ kstatus)
+
+sprList :: String -> String -> S_or_E -> IO [SprList]
 sprList dir series soe =
     withCString dir $ \dir' ->
         withCString series $ \series' ->
@@ -109,7 +125,37 @@ sprList dir series soe =
                     n'  <- fromIntegral <$> peek n
                     res <- peekArray n' spr
                     c_Free_Memory spr
-                    return res
+                    return $ map readSprList res
+
+checkSpr :: String -> String -> String -> S_or_E -> IO [SprList]
+checkSpr dir series myid soe =
+    withCString dir $ \dir' ->
+        withCString series $ \series' ->
+            alloca $ \ptr ->
+                alloca $ \n ->
+                    withCString myid $ \myid' -> do
+                        verbaResult =<< c_CheckSpr dir' series' ptr n myid' (writeS_or_E soe)
+                        spr <- peek ptr
+                        n'  <- fromIntegral <$> peek n
+                        res <- peekArray n' spr
+                        c_Free_Memory spr
+                        return $ map readSprList res
+
+extractKey :: String -> String -> IO BSC8.ByteString
+extractKey dir kid =
+    withCString dir $ \dir' ->
+        withCString kid $ \kid' ->
+            allocaBytes 304 $ \buff -> do
+                verbaResult =<< c_ExtractKey dir' kid' buff
+                BSC8.packCStringLen (castPtr buff, 304)
+
+getAlias :: String -> String -> IO String
+getAlias dir kid =
+    withCString dir $ \dir' ->
+        withCString kid $ \kid' ->
+            allocaBytes 121 $ \buff -> do
+                verbaResult =<< c_GetAlias dir' kid' buff
+                reverse . dropWhile (== ' ') . reverse . decodeCp1251 <$> BSC8.packCStringLen (castPtr buff, 120)
 
 getFileSenderId :: String -> IO String
 getFileSenderId path =
