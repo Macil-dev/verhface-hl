@@ -50,11 +50,27 @@ enCryptFile src dst sender rcvr series =
                 withCString series $ \series' ->
                     verbaResult =<< c_EnCryptFile src' dst' sender rcvr' series'
 
+enCryptFileEx :: String -> String -> String -> [Ptr Word8] -> IO ()
+enCryptFileEx src dst sender keys =
+    withCString src $ \src' ->
+        withCString dst $ \dst' ->
+            withCString sender $ \sender' ->
+                withArrayLen keys $ \len keys' ->
+                    verbaResult =<< c_EnCryptFileEx src' dst' sender' keys' (fromIntegral len) 0
+
 deCryptFile :: String -> String -> Word16 -> IO ()
 deCryptFile src dst rcvr =
     withCString src $ \src' ->
         withCString dst $ \dst' ->
             verbaResult =<< c_DeCryptFile src' dst' rcvr
+
+deCryptFileEx :: String -> String -> String -> BSC8.ByteString -> IO ()
+deCryptFileEx src dst rcvr key =
+    withCString src $ \src' ->
+        withCString dst $ \dst' ->
+            withCString rcvr $ \rcvr' ->
+                BSC8.useAsCString key $ \key' ->
+                    verbaResult =<< c_DeCryptFileEx src' dst' rcvr' (castPtr key')
 
 signFile :: String -> String -> String -> IO String
 signFile src dst [] =
@@ -177,8 +193,6 @@ getCryptKeysF path =
                     series' <- peekCAString series
                     c_Free_Memory user_list
                     return (res, series')
-
-            
 
 readUSR_KEYS_INFO info =
     USR_KEYS_INFO (BSC8.unpack $ _c_num info)
